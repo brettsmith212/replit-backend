@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
 
 const { generateFile } = require('./generateFile')
 const { execute } = require('./execute')
@@ -11,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  return res.json({ hello: 'world' })
+  return res.json({ application: 'Replit Clone Backend' })
 })
 
 app.post("/run", async (req, res) => {
@@ -20,11 +21,12 @@ app.post("/run", async (req, res) => {
     return res.status(400).json({ success: false, error: "Empty code body!" })
   }
   try {
-    // need to generate a javascript file with content from request
+    // generate a javascript file with content from request
     const filepath = await generateFile(language, code);
-    // need to run the file and send response back
+    // run the file and send response back
     const output = await execute(filepath);
-
+    // delete code file
+    fs.unlinkSync(filepath)
     return res.json({ filepath, output })
   } catch (err) {
     res.status(500).json({ err })
